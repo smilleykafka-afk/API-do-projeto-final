@@ -1,10 +1,10 @@
 # TechFix REST API
 
-Standalone Laravel 12 API for TechFix. Run commands from this repository root. The Flutter application remains at `C:\Projeto Final\TechFix` and connects by URL; its files were not changed.
+API independente do TechFix, desenvolvida com Laravel 12. Execute os comandos na raiz deste repositório. A aplicação Flutter permanece em `C:\Projeto Final\TechFix` e se conecta pela URL; seus arquivos não foram alterados.
 
-## Docker setup
+## Configuração com Docker
 
-Start Docker Desktop (Linux engine). See [Docker instructions](docs/DOCKER.md) for volume checks before startup. Compose uses project `techfix` and the existing external volumes `techfix_mysql-data` and `techfix_api-storage`. Missing volumes cause startup to fail instead of creating an empty database or a new application key. Never run the old and new Compose definitions concurrently.
+Inicie o Docker Desktop com o mecanismo Linux. Consulte as [instruções do Docker](docs/DOCKER.md) para verificar os volumes antes da inicialização. O Compose utiliza o projeto `techfix` e os volumes externos existentes `techfix_mysql-data` e `techfix_api-storage`. Se os volumes estiverem ausentes, a inicialização falhará para evitar a criação de um banco de dados vazio ou de uma nova chave da aplicação. Nunca execute as configurações antiga e nova do Compose ao mesmo tempo.
 
 ```powershell
 docker compose config --quiet
@@ -15,29 +15,29 @@ docker compose exec api php vendor/phpunit/phpunit/phpunit --do-not-cache-result
 powershell -NoProfile -ExecutionPolicy Bypass -File tools/test_api.ps1 -CleanupTestEmployee
 ```
 
-API: `http://localhost:8000/api`; health: `http://localhost:8000/up`. PHPUnit uses isolated in-memory SQLite; the smoke test uses live MySQL. Do not reset the database or delete volumes. Host `.env` is preserved locally, ignored by Git and excluded from Docker builds. Container startup reuses the application key stored in the storage volume and runs pending migrations.
+API: `http://localhost:8000/api`; verificação de funcionamento: `http://localhost:8000/up`. O PHPUnit utiliza um banco SQLite isolado em memória; o teste básico de funcionamento utiliza o MySQL em execução. Não reinicialize o banco de dados nem exclua os volumes. O arquivo `.env` da máquina é preservado localmente, ignorado pelo Git e excluído das compilações do Docker. A inicialização do contêiner reutiliza a chave da aplicação armazenada no volume de armazenamento e executa as migrações pendentes.
 
-## Flutter connection
+## Conexão com o Flutter
 
-Run these commands from the separate Flutter repository:
+Execute estes comandos no repositório separado da aplicação Flutter:
 
 ```powershell
 cd 'C:\Projeto Final\TechFix'
 flutter run -d chrome --web-port=8080 --dart-define=API_BASE_URL=http://localhost:8000/api
-# Android emulator:
+# Emulador Android:
 flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000/api
 ```
 
-CORS permits `http://localhost:8080`; authentication uses Sanctum bearer tokens. Moving source does not change the published port or API URL.
+O CORS permite a origem `http://localhost:8080`; a autenticação utiliza tokens do tipo Bearer do Sanctum. A mudança de localização do código-fonte não altera a porta publicada nem a URL da API.
 
-## API and administration
+## API e administração
 
-Registration creates employees. Only administrators manage users. Create/promote an administrator interactively with `docker compose exec api php artisan techfix:admin admin@example.com`. There are no built-in administrator credentials.
+O cadastro cria funcionários. Somente administradores podem gerenciar usuários. Crie ou promova um administrador de forma interativa com `docker compose exec api php artisan techfix:admin admin@example.com`. Não há credenciais de administrador predefinidas.
 
-The existing implementation provides authentication, profile, dashboard, employees and CRUD for clientes, aparelhos, ordens-servico, parts and users. Device customers are optional; orders require a device. Legacy IMEI data remains supported. Records are shared by shop staff. See the [API contract](docs/API.md), [Postman collection](docs/TechFix.postman_collection.json), [demo](docs/DEMO.md) and [validation report](docs/VALIDATION.md). Regenerate Postman with `powershell -File tools/build_postman.ps1`.
+A implementação atual oferece autenticação, perfil, painel, funcionários e operações de criação, consulta, atualização e exclusão (CRUD) de clientes, aparelhos, ordens de serviço, peças e usuários. A associação de clientes aos aparelhos é opcional; as ordens de serviço exigem um aparelho. Os dados legados de IMEI continuam sendo aceitos. Os registros são compartilhados entre os funcionários da loja. Consulte o [contrato da API](docs/API.md), a [coleção do Postman](docs/TechFix.postman_collection.json), a [demonstração](docs/DEMO.md) e o [relatório de validação](docs/VALIDATION.md). Gere novamente a coleção do Postman com `powershell -File tools/build_postman.ps1`.
 
-For a non-Docker installation: install PHP 8.2+, Composer and MySQL, run `composer install`, configure the preserved local `.env`, then `php artisan migrate` and `php artisan serve --host=0.0.0.0 --port=8000 --no-reload`. Only generate a key for a genuinely new installation. Tests additionally require PDO SQLite. Use HTTPS and disable debug mode for deployment.
+Para instalar sem Docker: instale PHP 8.2 ou superior, Composer e MySQL, execute `composer install`, configure o arquivo `.env` local preservado e execute `php artisan migrate` e `php artisan serve --host=0.0.0.0 --port=8000 --no-reload`. Gere uma chave apenas para uma instalação realmente nova. Os testes também exigem a extensão PDO SQLite. Utilize HTTPS e desative o modo de depuração em produção.
 
-## Transfer preservation
+## Preservação dos arquivos durante a transferência
 
-The previous destination project is preserved locally in `.migration-backup/destination-before-techfix/`, excluded from Git and Docker builds. The original backend at `C:\Projeto Final\TechFix\backend` remains intact. Its removal requires separate user authorization after validation.
+O projeto que existia anteriormente no destino está preservado localmente em `.migration-backup/destination-before-techfix/`, excluído do Git e das compilações do Docker. O backend original em `C:\Projeto Final\TechFix\backend` permanece intacto. Sua remoção exige uma autorização específica do usuário após a validação.
